@@ -1,0 +1,44 @@
+version: '3.5'
+services:
+  mysql:
+    image: mysql:8.0.36-debian
+    container_name: mysql-elastic
+    restart: no
+    hostname: mysql-elastic
+    ports:
+      - 3306:3306
+    volumes:
+      - ./mysql_data:/val/lib/mysql
+    environment:
+      - MYSQL_DATABASE=elasticsearch
+      - MYSQL_ROOT_PASSWORD=quancntt2003
+  elasticsearch:
+    image: elasticsearch:8.8.0
+    container_name: elastic
+    hostname: elastic
+    ports:
+      - 9200:9200
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    environment:
+      - http.host=0.0.0.0
+      - transport.host=elastic
+      - network.host=0.0.0.0
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+      - cluster.name=elastic
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+  kibana:
+    container_name: kibana-elastic
+    image: kibana:8.8.0
+    depends_on:
+      - elasticsearch
+    ports:
+      - 5601:5601
+volumes:
+  esdata:
+    driver: local
